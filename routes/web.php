@@ -95,11 +95,33 @@ Route::get('/', function () {
             ->select(['film_id','title','special_features','replacement_cost'])
             ->whereNotBetween('replacement_cost',[18.99,28.99])
             ->orderBy('film_id','desc')
+            ->skip(3)
             ->limit(10)
             ->get();
 
 
      return $results;
+
+
+    /*  
+      //Querey-6:  
+          
+        select film_id ,title,special_features,replacement_cost 
+        from film
+        where replacement_cost between 19.99 and 28.99
+        order by film_id
+        limit 10 
+        
+     */
+
+    $values = DB::table('film')
+            ->select(['film_id','title','special_features','replacement_cost'])
+            ->where('title','AFRICAN EGG')
+            ->orWhere('title','Agent Truman')
+            ->get();
+
+
+     return $values;
      
      
 });
