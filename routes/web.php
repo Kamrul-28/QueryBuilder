@@ -80,6 +80,24 @@ Route::get('/', function () {
             ->limit(10)
             ->get();
 
+    /*  
+      //Querey-5:  
+          
+        select film_id ,title,special_features,replacement_cost 
+        from film
+        where replacement_cost between 19.99 and 28.99
+        order by film_id
+        limit 10 
+        
+     */
+
+    $results = DB::table('film')
+            ->select(['film_id','title','special_features','replacement_cost'])
+            ->whereNotBetween('replacement_cost',[18.99,28.99])
+            ->orderBy('film_id','desc')
+            ->limit(10)
+            ->get();
+
 
      return $results;
      
