@@ -62,6 +62,24 @@ Route::get('/', function () {
         ->get();
 
 
+    /*  
+      //Querey-4:  
+          
+        select film_id ,title,special_features,replacement_cost 
+        from film
+        where replacement_cost between 19.99 and 28.99
+        order by film_id
+        limit 10 
+        
+     */
+
+    $results = DB::table('film')
+            ->select(['film_id','title','special_features','replacement_cost'])
+            ->whereBetween('replacement_cost',[19.99,28.99])
+            ->orderBy('film_id','desc')
+            ->limit(10)
+            ->get();
+
 
      return $results;
      
