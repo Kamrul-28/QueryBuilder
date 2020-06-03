@@ -34,8 +34,21 @@ Route::get('/', function () {
     })
     ->get();
 
+    /*
+    //Querey-2:
+        select last_name ,count(*) As count
+        from actor
+        group by last_name
+        order by count desc 
+    */
+
+    $results = DB::table('actor')
+            ->select(['last_name',DB::raw('count(*) as user_count')])
+            ->groupBy('last_name')
+            ->get();
 
 
+    
      return $results;
      
      
