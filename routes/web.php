@@ -48,7 +48,21 @@ Route::get('/', function () {
             ->get();
 
 
+    /*
+    //Querey-3:
     
+        select country_id , country from country
+        where country in ('Afghanistan','Bangladesh','China')
+        order by country_id desc
+     */
+    $results = DB::table('country')
+        ->select(['country_id','country'])
+        ->whereIn('country',['Afghanistan','Bangladesh','China'])
+        ->orderBy('country_id','desc')
+        ->get();
+
+
+
      return $results;
      
      
