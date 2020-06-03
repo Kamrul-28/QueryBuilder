@@ -148,8 +148,34 @@ Route::get('/', function () {
     ->orderBy('staff_id')
     ->get();
 
+    /* Sub Querey */
+    /*
+        select film_id ,title from film
+        where title like 'K%' or title like 'O%'
+        and language_id in(
+            select language_id from language
+            where name='English'
+        )
+        order by title
+    */
 
-     return $stuffs;
+    $films=DB::table('film')
+            ->select('film_id','title')
+            ->where('title','like','K%')
+            ->orWhere('title','like','O%')
+            ->whereIn('language_id',function($query){
+                    $query->select('language_id')
+                       ->from('language')
+                       ->where('name','English')
+                       ->get();             
+            })
+            ->orderBy('film_id')
+            ->get();
+
+
+
+
+     return $films;
      
      
 });
