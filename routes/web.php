@@ -173,6 +173,7 @@ Route::get('/', function () {
     //         ->get();
 
     /*
+    Complex joins and subquery
     select store_details.* , payment_details.sales
         from (
             select sto.store_id,city.city,count.country
@@ -239,8 +240,39 @@ Route::get('/', function () {
         
     // },'payment_details','store_details.store_id','=','payment_details.store_id')
     // ->get();
+
+
+
+     /*
+        Conditionals in Query
+           
+        select cat.name,count(f.film_id) as film_count
+        from category as cat
+        left join film_category as fc
+        on cat.category_id = fc.category_id
+        join film as f
+        on fc.film_id=f.film_id
+        join language as lang
+        on f.language_id=lang.language_id
+        where lang.name='English'
+        group by cat.name
+        order by film_count desc
+    */
+
+ $categories=DB::query()
+            ->select('cat.name',DB::raw('count(f.film_id) as film_count'))
+            ->from('category as cat')
+            ->leftJoin('film_category as fc','cat.category_id','=','fc.category_id')
+            ->join('film as f','fc.film_id','=','f.film_id')
+            ->join('language as lang',function($join){
+                $join->on('f.language_id','=','lang.language_id')
+                ->where('lang.name','English');
+            })
+            ->groupBy('cat.name')
+            ->orderBy('film_count','DESC')
+            ->get();
             
-     dump($results);
+     return $categories;
      
      
 });
