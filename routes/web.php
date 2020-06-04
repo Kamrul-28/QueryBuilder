@@ -136,17 +136,17 @@ Route::get('/', function () {
         on c.`country_id`=count.`country_id`
     */
 
-    $stuffs = DB::table('staff as s')
-    ->select([
-        's.staff_id','s.first_name','s.last_name','s.email',
-        'addr.address','addr.district','addr.postal_code',
-        'c.city','count.country'
-    ])
-    ->leftJoin('address as addr','s.address_id','addr.address_id')
-    ->leftJoin('city as c','addr.city_id','c.city_id')
-    ->leftJoin('country as count','c.country_id','count.country_id')
-    ->orderBy('staff_id')
-    ->get();
+    // $stuffs = DB::table('staff as s')
+    // ->select([
+    //     's.staff_id','s.first_name','s.last_name','s.email',
+    //     'addr.address','addr.district','addr.postal_code',
+    //     'c.city','count.country'
+    // ])
+    // ->leftJoin('address as addr','s.address_id','addr.address_id')
+    // ->leftJoin('city as c','addr.city_id','c.city_id')
+    // ->leftJoin('country as count','c.country_id','count.country_id')
+    // ->orderBy('staff_id')
+    // ->get();
 
     /* Sub Querey */
     /*
@@ -159,23 +159,88 @@ Route::get('/', function () {
         order by title
     */
 
-    $films=DB::table('film')
-            ->select('film_id','title')
-            ->where('title','like','K%')
-            ->orWhere('title','like','O%')
-            ->whereIn('language_id',function($query){
-                    $query->select('language_id')
-                       ->from('language')
-                       ->where('name','English')
-                       ->get();             
-            })
-            ->orderBy('film_id')
+    // $films=DB::table('film')
+    //         ->select('film_id','title')
+    //         ->where('title','like','K%')
+    //         ->orWhere('title','like','O%')
+    //         ->whereIn('language_id',function($query){
+    //                 $query->select('language_id')
+    //                    ->from('language')
+    //                    ->where('name','English')
+    //                    ->get();             
+    //         })
+    //         ->orderBy('film_id')
+    //         ->get();
+
+    /*
+    select store_details.* , payment_details.sales
+        from (
+            select sto.store_id,city.city,count.country
+            from store as sto
+            left join address as addr
+            on sto.address_id=addr.address_id
+            join city
+            on addr.city_id=city.city_id
+            join country as count
+            on city.country_id=count.country_id
+
+        ) as store_details
+        inner join(
+            select cus.store_id,sum(pay.amount) as sales
+            from customer as cus
+            join payment as pay
+            on cus.customer_id = pay.customer_id
+            group by cus.store_id
+            
+        )
+        as payment_details
+
+        on store_details.store_id = payment_details.store_id
+
+        order by store_details.store_id
+    */
+    $store_details=DB::query()
+    ->select(['sto.store_id','city.city','count.country'])
+    ->from('store as sto')
+    ->leftJoin('address as addr','sto.address_id','=','addr.address_id')
+    ->join('city','addr.city_id','=','city.city_id')
+    ->join('country as count','city.country_id','=','count.country_id');
+
+    $payment_details=DB::query()
+    ->select(['cus.store_id',DB::raw('sum(pay.amount) as sales')])
+    ->from('customer as cus')
+    ->join('payment as pay','cus.customer_id','=','pay.customer_id')
+    ->groupBy('cus.store_id');
+
+    $results=DB::query()
+            ->select('store_details.*','payment_details.sales')
+            ->fromSub($store_details,'store_details' )
+            ->joinSub($payment_details,'payment_details','store_details.store_id','=','payment_details.store_id')
+            //->toSql();
             ->get();
 
-
-
-
-     return $films;
+    /*We Can Use this Also */
+    
+    // $results=DB::query()
+    // ->select('store_details.*','payment_details.sales')
+    // ->fromSub(function($query){
+    //     $query->select(['sto.store_id','city.city','count.country'])
+    //     ->from('store as sto')
+    //     ->leftJoin('address as addr','sto.address_id','=','addr.address_id')
+    //     ->join('city','addr.city_id','=','city.city_id')
+    //     ->join('country as count','city.country_id','=','count.country_id');
+        
+    // },'store_details' )
+    // ->joinSub(function($query){
+    //     $query   ->select(['cus.store_id',DB::raw('sum(pay.amount) as sales')])
+    //     ->from('customer as cus')
+    //     ->join('payment as pay','cus.customer_id','=','pay.customer_id')
+    //     ->groupBy('cus.store_id');
+        
+    // },'payment_details','store_details.store_id','=','payment_details.store_id')
+    // ->get();
+            
+     dump($results);
      
      
 });
